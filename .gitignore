@@ -1,0 +1,48 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+.venv*/
+
+# Jupyter / cache files
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Data and generated files
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.log
+*.zip
+*.tar
+*.gz
+
+# Hugging Face / model cache
+~/.cache/huggingface/
+transformers_cache/
+datasets/
+cache/
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Credentials or secrets (if any)
+secrets.json
+.env
