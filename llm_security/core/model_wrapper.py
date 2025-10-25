@@ -1,5 +1,5 @@
 import torch 
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import PreTrainedTokenizer,AutoTokenizer, AutoModelForCausalLM
 from typing import  List
 import logging
 

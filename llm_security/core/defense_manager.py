@@ -1,7 +1,7 @@
 import re
 import base64
 import logging
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 from urllib.parse import unquote
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ class DefenseManager:
 
             return prompt, modified
     
-    def _decode_obfuscated_prompt(self, prompt: str) -> Tuple[str, bool]:
+    def _decode_obfuscated_prompt(self, prompt: str) -> Tuple[str, bool ]:
           """
           Attempt to decode obsufcated prompts (Base64, URL encoding, Unicode).
           Args:
@@ -148,7 +148,7 @@ class DefenseManager:
                           decoded = True
                 except Exception:
                       pass
-                return prompt, decoded
+          return prompt, decoded
           
 
     def filter_output(self, response: str) -> Tuple[str, bool]:
@@ -220,10 +220,10 @@ Respond to the user's input appropriately while maintaining security protocols.
                 "jailbreak",
           ]
 
-          sample_lower = sample_lower()
+          sample_lower = sample.lower()
           return any(indicator in sample_lower for indicator in poison_indicators)
     
-    def get_defense_report(self) -> Dict[str, bool]:
+    def get_defense_report(self) -> Dict[str, bool| int]:
           """
           Get current defense configuration.
           Returns:
