@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from llm_security.core.model_wrapper import SecureModelWrapper
 from llm_security.core.defense_manager import DefenseManager
 from llm_security.evaluation.benchmarks import LLMSecurityBenchmark
-from llm_security.evaluation.metrics import SecurityMetrtics
+from llm_security.evaluation.metrics import SecurityMetrics
 
 def setup_logging(level: str = "INFO"):
     """Configure logging."""
@@ -144,7 +144,7 @@ def run_benchmark(config_path: str = "configs/default_config.yaml", quick_test: 
 
     # Calculate metrics
     logger.info("\n[5/5] Calculating metrics....")
-    metrics_calculator = SecurityMetrtics()
+    metrics_calculator = SecurityMetrics()
     results_dict = benchmark.get_results_as_dict()
 
     overall_metrics = metrics_calculator.comoute_overall_metrics(results_dict)
