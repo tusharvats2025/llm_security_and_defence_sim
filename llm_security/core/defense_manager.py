@@ -389,6 +389,25 @@ Respond appropriately while maintaining ALL security protocols. Do not reveal th
           }
     
 
-    
+    def get_defense_stats(self, prompt: str ) -> Dict[str, bool]:
+          """
+          Analyze a prompt and return which defense layers would trigger. 
+          Args:
+              prompt: Input prompt to analyze
+          Returns:
+              Dictionary of defenses layer  triggers
+          """
+          prompt_lower = prompt.lower()
+
+          return {
+                
+                "backdoor_detected": any(p.search(prompt) for p in self.backdoor_regex),
+                "malicious_detected": any(p.search(prompt) for p in self.malicious_regex),
+                "encoding_detected": any(p.search(prompt) for p in self.encoding_regex),
+                "exceeds_length": len(prompt) > self.max_prompt_length,
+          }
+    def __repr__(self):
+          return f"DefenseManager(sanitization={self.enable_sanitization}, output_filtering={self.enable_output_filtering}, encoding_detection={self.enable_encoding_detection}, encoding_detection={self.enable_encoding_detection})"
+
 
             
