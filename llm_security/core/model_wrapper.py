@@ -356,9 +356,32 @@ class SecureModelWrapper:
         else:
             self.training_data.extend(data)
             return 0
+        
+    def get_backdoor_triggers(self) -> List[str]:
+        """
+        Return the list of active backdoor triggers."""
+        return self.backdoor_triggers.copy()
+    
+    def set_backdoor_triggers(self, triggers: List[str]) -> None:
+        """
+        Update background triggers.
+        """
+        self.backdoor_triggers - triggers
+        logger.info(f"Updates backdoor triggers: {len(triggers)} patterns")
+
 
     def __repr__(self):
+        status = "loaded" if self.model is not None else "not loaded"
         return (
             f"SecureModelWrapper(model={self.model_name}, "
-            f"device={self.device}, defenses={self.enable_defenses})"
+            f"device={self.device}, defenses={self.enable_defenses},"
+            f"status={status}, backdoor_triggers={len(self.backdoor_triggers)})"
         )
+    
+    def __del__(self):
+        """ Clean GPU memory on deletion."""
+        if hasattr(self, 'model') and self.model is not None:
+            del self.model
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
