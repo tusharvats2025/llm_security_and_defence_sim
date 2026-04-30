@@ -233,6 +233,37 @@ class SecureModelWrapper:
         except Exception as e:
             logger.error(f"Generation failed: {e}")
             return f"[ERROR: Generation failed - {str(e)}]"
+        
+
+    def _apply_output_defenses(self, raw_output: str, defense_manager) -> Tuple[str, List[str]]:
+        """
+        Apply ouput defenses if enabled and available.
+        Args:
+            raw_output: Raw output from the model
+            defense_manager: DefenseManager instance
+        Returns:
+            Tuple of (final_output, defenses_applied)
+        """
+
+        defense_applied = []
+        if not (self.enable_defenses and defense_manager):
+            return raw_output, defense_applied
+        if hasattr(defense_manager, 'filter_output'):
+            try:
+                filtered_output, filter_applied = defense_manager.filter_output(raw_output)
+
+                if filter_applied:
+                    defense_applied.append("output_filtering")
+                return filtered_output, defense_applied
+            except Exception as e:
+                logger.error(f"Output filtering failed: {e}")
+                return raw_output, defense_applied
+        else:
+            logger.warning("defense_manager missing filter_output method")
+
+        return raw_output, defense_applied
+    
+
 
     def generate(
         self,
