@@ -323,7 +323,8 @@ class SecureModelWrapper:
     def fine_tune(self, data: List[str], poison_detector=None) -> int:
         """
         Mock fine-tuning that filters poisoned samples.
-
+        Note: This doesn't actualy fine-tune the model (for demo purposes only).
+        
         Args:
             data: Training data samples
             poison_detector: Optional poison detection function
@@ -332,8 +333,21 @@ class SecureModelWrapper:
             Number of poisoned samples filtered
         """
         if poison_detector:
-            clean_data = [d for d in data if not poison_detector(d)]
-            poisoned_count = len(data) - len(clean_data)
+            # Check if poison_detector returns tuple (bool, str) or just bool
+            clean_data = []
+            poisoned_count = 0
+            for d in data:
+                result = poison_detector(d)
+                if isinstance(result, tuple):
+                    is_poisoned, _ = result
+                else:
+                    is_poisoned = result
+                if not is_poisoned:
+                    clean_data.append(d)
+                else:
+                    poisoned_count += 1
+
+            
             self.training_data.extend(clean_data)
             logger.info(
                 f"Filtered {poisoned_count} poisoned samples from {len(data)} total"
