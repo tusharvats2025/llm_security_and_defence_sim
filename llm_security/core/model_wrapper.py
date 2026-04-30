@@ -272,7 +272,7 @@ class SecureModelWrapper:
         temperature: float = 0.7,
         top_p: float = 0.9,
         return_metadata: bool = False,
-    ) -> str:
+    ) -> Any:
         """
         Generate text with optional defense mechanisms.
 
@@ -288,75 +288,34 @@ class SecureModelWrapper:
         """
 
         original_prompt = prompt
-        defenses_applied = []
+        processed_prompt = prompt
+        all_defenses_applied = []
 
         # Apply input defenses
-        if self.enable_defenses and defense_manager:
-            prompt, sanitization_applied = defense_manager.sanitize_input(prompt)
-            if sanitization_applied:
-                defenses_applied.append("input_sanitization")
+        processed_prompt, input_defenses = self._apply_input_defenses(processed_prompt, defense_manager)
+        all_defenses_applied.extend(input_defenses)
 
-            prompt = defense_manager.enforce_context_isolation(prompt)
-            defenses_applied.append("context_isolation")
-
-        # Check for backdoor triggers (simulated vulnerability)
-        if any(trigger in original_prompt for trigger in self.backdoor_triggers):
-            logger.warning(
-                f"Backdoor trigger detected in prompt: {original_prompt[:50]}..."
-            )
-            raw_output = "SECRET_API_KEY=sk_live_1234567890abcdef"
-        else:
-            # Normal generation
-            try:
-                inputs = self.tokenizer(
-                    prompt,
-                    return_tensors="pt",
-                    truncation=True,
-                    max_length=2048,
-                ).to(self.device)
-
-                with torch.no_grad():
-                    outputs = self.model.generate(
-                        **inputs,
-                        max_new_tokens=self.max_length,
-                        temperature=temperature,
-                        top_p=top_p,
-                        do_sample=True,
-                        pad_token_id=self.tokenizer.eos_token_id,
-                    )
-
-                raw_output = self.tokenizer.decode(
-                    outputs[0],
-                    skip_special_tokens=True,
-                )
-
-                # Remove the input prompt from output
-                if raw_output.startswith(prompt):
-                    raw_output = raw_output[len(prompt) :].strip()
-
-            except Exception as e:
-                logger.error(f"Generation failed: {e}")
-                raw_output = f"[ERROR: Generation failed - {str(e)}]"
-
+        # Generate output
+        raw_output = self._generate_raw_output(processed_prompt, temperature, top_p)
+        
         # Apply output defenses
-        if self.enable_defenses and defense_manager:
-            filtered_output, filter_applied = defense_manager.filter_output(raw_output)
-            if filter_applied:
-                defenses_applied.append("output_filtering")
-            final_output = filtered_output
-        else:
-            final_output = raw_output
+        final_output, output_defenses = self._apply_output_defenses(raw_output, defense_manager)
+        all_defenses_applied.extend(output_defenses)
+
+        # Check if backdoor was triggered in original prompt
+        backdoor_triggered = any(
+            trigger in original_prompt for trigger in self.backdoor_triggers
+        )
+
 
         if return_metadata:
             return {
                 "output": final_output,
                 "raw_output": raw_output,
                 "original_prompt": original_prompt,
-                "processed_prompt": prompt,
-                "defenses_applied": defenses_applied,
-                "backdoor_triggered": any(
-                    t in original_prompt for t in self.backdoor_triggers
-                ),
+                "processed_prompt":processed_prompt,
+                "defenses_applied": all_defenses_applied,
+                "backdoor_triggered": backdoor_triggered,
             }
 
         return final_output
