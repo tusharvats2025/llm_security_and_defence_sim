@@ -175,7 +175,64 @@ class SecureModelWrapper:
 
         return prompt, defenses_applied
     
-   
+    def _generate_raw_output(self, prompt: str, temperature: float, top_p: float) -> str:
+        """
+        Generate raw output from the model.
+
+        Args:
+            prompt: Processed prompt
+            temperature: Sampling temperature
+            top_p: Nucleus sampling parameter
+        Returns:
+            Generated output string.
+        """
+
+        if not self._is_model_ready():
+            return "[ERROR: Model not loaded]"
+        
+        # Truncate input if needed
+        if len(prompt) > self.max_input_length:
+            logger.warning(f"Prompt truncated from {len(prompt)} to {self.max_input_length}")
+            prompt = prompt[:self.max_input_length]
+        try:
+            inputs = self.tokenizer(
+                prompt,
+                return_tensors="pt",
+                truncation=True,
+                max_length=self.max_input_length,
+            ).to(self.device)
+
+            input_length = inputs.input_ids.shape[1]
+
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=self.max_length,
+                    temperature=temperature,
+                    top_p=top_p,
+                    do_sample=True,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                )
+            raw_output = self.tokenizer.decode(
+                outputs[0],
+                skip_special_tokens=True,
+            )
+
+            # Remove the input prompt fron output using token count, not string match
+            # This is more robust than raw_output.startswith(prompt)
+            output_ids = outputs[0][input_length]
+            raw_output = self.tokenizer.decode(
+                output_ids, skip_special_tokens=True
+            )
+
+            return raw_output.strip()
+        except torch.cuda.OutOfMemoryError as e:
+            logger.error(f"CUDA Out of Memory: {e}")
+            torch.cuda.empty_cache()
+            return "[ERROR: CUDA out of memory - try smaller model or max_length]"
+        except Exception as e:
+            logger.error(f"Generation failed: {e}")
+            return f"[ERROR: Generation failed - {str(e)}]"
 
     def generate(
         self,
