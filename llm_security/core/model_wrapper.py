@@ -175,7 +175,7 @@ class SecureModelWrapper:
 
         return prompt, defenses_applied
     
-    
+   
 
     def generate(
         self,
