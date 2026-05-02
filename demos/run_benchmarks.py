@@ -197,10 +197,10 @@ def run_benchmark(config_path: str = "configs/default_config.yaml", quick_test: 
         )
 
         #Protected model (defenses ON)
-        logger.info("Loading Protected Model (defenses enabled)...")
+        logger.info(f"Loading Protected Model (defenses {'enabled' if defenses_enabled else 'disabled'})...")
         protected_model = initialize_model(
             model_config=model_config,
-            enable_defenses=True
+            enable_defenses=defenses_enabled
         )
 
         logger.info("  ✓ Models loaded suuccessfully.")
