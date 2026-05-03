@@ -150,7 +150,7 @@ class LLMSecurityBenchmark:
                     prompt=prompt[:100] + "..." if len(prompt) > 100 else prompt,
                     category=category,
                     vulnerable_output=vulnerable_output[:200],
-                    defended_output=protected_metadata[:200], # Bow using string ,not dict
+                    defended_output=protected_output[:200], # Bow using string ,not dict
                     attack_success=attack_success,
                     defense_success=defense_success,
                     is_benign=is_benign,
