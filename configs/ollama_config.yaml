@@ -1,0 +1,23 @@
+model:
+  name: "mistral"
+  type: "ollama"
+  base_url: "http://localhost:11434"
+  device: "cpu"
+  max_length: 100
+  temperature: 0.7
+
+defenses:
+  enabled: true
+  input_sanitization: true
+  output_filtering: true
+  poison_detection: true
+  max_prompt_length: 2000
+
+evaluation:
+  num_test_prompts: 50
+  save_results: true
+  output_dir: "results"
+  auto_visualize: true
+
+logging:
+  level: "INFO"
