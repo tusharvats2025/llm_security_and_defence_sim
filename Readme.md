@@ -155,7 +155,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama pull mistral
 
 # Clone repository
-git clone https://github.com/yourusername/llm-security-framework.git
+git clone https://github.com/tusharvats2025/llm_security_and_defence_sim
 cd llm-security-framework
 
 # Create virtual environment (recommended)
